@@ -23,10 +23,7 @@ function render() {
   const showBtn = document.getElementById('show-answer-btn');
   const prevBtn = document.getElementById('prev-btn');
   const nextBtn = document.getElementById('next-btn');
-  const badge = document.getElementById('count-badge');
   const errEl = document.getElementById('error-message');
-
-  badge.textContent = cards.length + ' card' + (cards.length !== 1 ? 's' : '');
 
   if (cards.length === 0) {
     emptyEl.classList.remove('hidden');

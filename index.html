@@ -11,26 +11,30 @@
 :root{
   --brand:#057573; --brand-2:#037674; --brand-soft:#e6f1f1; --brand-glow:rgba(5,117,115,.2);
   --bg:#ebe9e9; --card:#ffffff; --text:#111827; --muted:#6c757d; --border:#dee2e6;
-  --danger:#dc3545; --radius:20px; --shadow:0 2px 8px rgba(0,0,0,.06);
+  --danger:#dc3545; --radius:20px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-.phone{width:420px;max-width:100%;background:var(--bg);border-radius:32px;overflow:hidden;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.4);padding:20px;}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.header h1{font-size:22px;font-weight:800;color:var(--text);}
-.badge{background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;}
-.card-area{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-height:140px;margin:12px 0;box-shadow:var(--shadow);}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:32px;overflow:hidden;position:relative;border:1px solid #334155;display:flex;flex-direction:column;}
+.status{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:14px;font-weight:600;color:#fff;background:var(--brand);}
+.status .icons{display:flex;gap:6px;align-items:center;}
+.header{background:var(--brand);padding:16px 20px;color:#fff;}
+.header h1{font-size:22px;font-weight:800;margin:0;}
+.header .sub{font-size:12px;opacity:.85;margin-top:2px;}
+.content{flex:1;padding:16px;overflow-y:auto;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
+.card-area{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-height:160px;margin:12px 0;}
 .counter{font-size:13px;color:var(--muted);font-weight:600;margin:8px 0;}
 .q-text{font-size:18px;font-weight:700;color:var(--text);line-height:1.4;}
 .answer{margin-top:12px;padding:12px;background:var(--brand-soft);border-radius:12px;color:var(--brand);font-weight:600;}
 .btn-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
-.btn{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border:none;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;}
-.btn:hover{transform:translateY(-1px);}
+.btn{background:var(--brand);color:#fff;border:none;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;}
+.btn:hover{background:var(--brand-2);}
 .btn.outline{background:#fff;color:var(--brand);border:1.5px solid var(--brand);}
 .btn.outline:hover{background:var(--brand-soft);}
 .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-.form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:12px 0;box-shadow:var(--shadow);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:12px 0;}
 .form h3{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text);}
 .form input,.form textarea{width:100%;margin:4px 0;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;font-family:inherit;font-size:14px;outline:none;}
 .form input:focus,.form textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-glow);}
@@ -38,47 +42,60 @@ body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#0F172A 0
 .error{color:var(--danger);font-size:13px;font-weight:600;margin:4px 0;}
 .hidden{display:none;}
 .empty{padding:24px;text-align:center;border:1px dashed var(--border);border-radius:var(--radius);background:var(--card);}
+.bottomnav{height:64px;background:var(--brand);display:flex;align-items:center;justify-content:space-around;padding:0 8px;}
+.bottomnav .bn{display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;font-size:10px;font-weight:600;cursor:pointer;opacity:.85;}
+.bottomnav .bn.active{opacity:1;}
+.bottomnav .bn i{width:22px;height:22px;}
 </style>
 </head>
 <body>
 <div class="phone">
+  <div class="status"><span>9:41</span><div class="icons"><i data-lucide="wifi" style="width:16px;height:16px;color:#fff;"></i><i data-lucide="battery-full" style="width:20px;height:20px;color:#fff;"></i></div></div>
   <div class="header">
     <h1>Flashcards</h1>
-    <span class="badge" id="count-badge">0 cards</span>
+    <div class="sub">Study smarter</div>
   </div>
+  <div class="content">
+    <div id="empty-state" class="empty hidden">
+      <p style="color:var(--muted);margin-bottom:12px;">No cards yet.</p>
+      <button class="btn" onclick="openAdd()">Add Card</button>
+    </div>
 
-  <div id="empty-state" class="empty hidden">
-    <p style="color:var(--muted);margin-bottom:12px;">No cards yet.</p>
-    <button class="btn" onclick="openAdd()">Add Card</button>
+    <div id="study" class="hidden">
+      <div id="card-counter" class="counter">Card 0 of 0</div>
+      <div class="card-area">
+        <div id="card-question" class="q-text"></div>
+        <div id="card-answer" class="answer hidden"></div>
+      </div>
+      <div class="btn-row">
+        <button id="show-answer-btn" class="btn outline" onclick="toggleAnswer()">Show Answer</button>
+        <button id="prev-btn" class="btn ghost" onclick="prevCard()">Previous</button>
+        <button id="next-btn" class="btn ghost" onclick="nextCard()">Next</button>
+        <button id="edit-btn" class="btn ghost" onclick="openEdit()">Edit</button>
+        <button id="delete-btn" class="btn ghost" onclick="deleteCard()">Delete</button>
+        <button id="add-btn" class="btn" onclick="openAdd()">Add Card</button>
+      </div>
+    </div>
+
+    <div id="form" class="form hidden">
+      <h3 id="form-title">Add Card</h3>
+      <input id="question-input" placeholder="Question" />
+      <textarea id="answer-input" placeholder="Answer"></textarea>
+      <div id="error-message" class="error hidden"></div>
+      <div class="btn-row">
+        <button id="save-btn" class="btn" onclick="saveCard()">Save</button>
+        <button id="cancel-btn" class="btn ghost" onclick="cancelForm()">Cancel</button>
+      </div>
+    </div>
   </div>
-
-  <div id="study" class="hidden">
-    <div id="card-counter" class="counter">Card 0 of 0</div>
-    <div class="card-area">
-      <div id="card-question" class="q-text"></div>
-      <div id="card-answer" class="answer hidden"></div>
-    </div>
-    <div class="btn-row">
-      <button id="show-answer-btn" class="btn outline" onclick="toggleAnswer()">Show Answer</button>
-      <button id="prev-btn" class="btn ghost" onclick="prevCard()">Previous</button>
-      <button id="next-btn" class="btn ghost" onclick="nextCard()">Next</button>
-      <button id="edit-btn" class="btn ghost" onclick="openEdit()">Edit</button>
-      <button id="delete-btn" class="btn ghost" onclick="deleteCard()">Delete</button>
-      <button id="add-btn" class="btn" onclick="openAdd()">Add Card</button>
-    </div>
-  </div>
-
-  <div id="form" class="form hidden">
-    <h3 id="form-title">Add Card</h3>
-    <input id="question-input" placeholder="Question" />
-    <textarea id="answer-input" placeholder="Answer"></textarea>
-    <div id="error-message" class="error hidden"></div>
-    <div class="btn-row">
-      <button id="save-btn" class="btn" onclick="saveCard()">Save</button>
-      <button id="cancel-btn" class="btn ghost" onclick="cancelForm()">Cancel</button>
-    </div>
+  <div class="bottomnav">
+    <div class="bn active"><i data-lucide="home"></i><span>Home</span></div>
+    <div class="bn"><i data-lucide="layers"></i><span>Cards</span></div>
+    <div class="bn"><i data-lucide="plus-circle"></i><span>Add</span></div>
+    <div class="bn"><i data-lucide="user"></i><span>Profile</span></div>
   </div>
 </div>
 
+<script>lucide.createIcons();</script>
 </body>
 </html>
