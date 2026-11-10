@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flashcard Quiz App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="app.js"></script>
+<style>
+:root{
+  --brand:#057573; --brand-2:#037674; --brand-soft:#e6f1f1; --brand-glow:rgba(5,117,115,.2);
+  --bg:#ebe9e9; --card:#ffffff; --text:#111827; --muted:#6c757d; --border:#dee2e6;
+  --danger:#dc3545; --radius:20px; --shadow:0 2px 8px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.phone{width:420px;max-width:100%;background:var(--bg);border-radius:32px;overflow:hidden;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.4);padding:20px;}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.header h1{font-size:22px;font-weight:800;color:var(--text);}
+.badge{background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;}
+.card-area{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-height:140px;margin:12px 0;box-shadow:var(--shadow);}
+.counter{font-size:13px;color:var(--muted);font-weight:600;margin:8px 0;}
+.q-text{font-size:18px;font-weight:700;color:var(--text);line-height:1.4;}
+.answer{margin-top:12px;padding:12px;background:var(--brand-soft);border-radius:12px;color:var(--brand);font-weight:600;}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+.btn{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border:none;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;}
+.btn:hover{transform:translateY(-1px);}
+.btn.outline{background:#fff;color:var(--brand);border:1.5px solid var(--brand);}
+.btn.outline:hover{background:var(--brand-soft);}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:12px 0;box-shadow:var(--shadow);}
+.form h3{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text);}
+.form input,.form textarea{width:100%;margin:4px 0;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;font-family:inherit;font-size:14px;outline:none;}
+.form input:focus,.form textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-glow);}
+.form textarea{resize:vertical;min-height:60px;}
+.error{color:var(--danger);font-size:13px;font-weight:600;margin:4px 0;}
+.hidden{display:none;}
+.empty{padding:24px;text-align:center;border:1px dashed var(--border);border-radius:var(--radius);background:var(--card);}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <h1>Flashcards</h1>
+    <span class="badge" id="count-badge">0 cards</span>
+  </div>
+
+  <div id="empty-state" class="empty hidden">
+    <p style="color:var(--muted);margin-bottom:12px;">No cards yet.</p>
+    <button class="btn" onclick="openAdd()">Add Card</button>
+  </div>
+
+  <div id="study" class="hidden">
+    <div id="card-counter" class="counter">Card 0 of 0</div>
+    <div class="card-area">
+      <div id="card-question" class="q-text"></div>
+      <div id="card-answer" class="answer hidden"></div>
+    </div>
+    <div class="btn-row">
+      <button id="show-answer-btn" class="btn outline" onclick="toggleAnswer()">Show Answer</button>
+      <button id="prev-btn" class="btn ghost" onclick="prevCard()">Previous</button>
+      <button id="next-btn" class="btn ghost" onclick="nextCard()">Next</button>
+      <button id="edit-btn" class="btn ghost" onclick="openEdit()">Edit</button>
+      <button id="delete-btn" class="btn ghost" onclick="deleteCard()">Delete</button>
+      <button id="add-btn" class="btn" onclick="openAdd()">Add Card</button>
+    </div>
+  </div>
+
+  <div id="form" class="form hidden">
+    <h3 id="form-title">Add Card</h3>
+    <input id="question-input" placeholder="Question" />
+    <textarea id="answer-input" placeholder="Answer"></textarea>
+    <div id="error-message" class="error hidden"></div>
+    <div class="btn-row">
+      <button id="save-btn" class="btn" onclick="saveCard()">Save</button>
+      <button id="cancel-btn" class="btn ghost" onclick="cancelForm()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
