@@ -1,0 +1,11 @@
+﻿{
+  "name": "flashcard-quiz-app",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --test tests/unit.test.js",
+    "test:browser": "npx playwright test tests/browser.spec.js"
+  }
+}
+
+
+
