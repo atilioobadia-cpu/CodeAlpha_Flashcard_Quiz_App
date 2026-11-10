@@ -58,10 +58,8 @@ function currentCard() {
 
 function next() {
   if (!state.cards.length) return;
-  if (state.currentIndex < state.cards.length - 1) {
-    state.currentIndex++;
-    state.isAnswerVisible = false;
-  }
+  state.currentIndex = (state.currentIndex + 1) % state.cards.length;
+  state.isAnswerVisible = false;
 }
 
 function previous() {
@@ -271,7 +269,7 @@ function render() {
     showBtn.textContent = state.isAnswerVisible ? 'Hide answer' : 'Show answer';
     showBtn.classList.toggle('hide', state.isAnswerVisible);
     prevBtn.disabled = state.currentIndex === 0;
-    nextBtn.disabled = state.currentIndex === state.cards.length - 1;
+    nextBtn.disabled = false;
   }
   renderSegments();
 }
@@ -309,7 +307,7 @@ document.getElementById('flashcard').addEventListener('click', (e) => {
 });
 document.getElementById('show-answer-btn').addEventListener('click', () => { if (state.cards.length) { state.isAnswerVisible = !state.isAnswerVisible; render(); } });
 document.getElementById('prev-btn').addEventListener('click', () => { if (state.currentIndex > 0) { state.currentIndex--; state.isAnswerVisible=false; render(); } });
-document.getElementById('next-btn').addEventListener('click', () => { if (state.currentIndex < state.cards.length-1) { state.currentIndex++; state.isAnswerVisible=false; render(); } });
+document.getElementById('next-btn').addEventListener('click', () => { next(); render(); });
 document.getElementById('edit-btn').addEventListener('click', () => {
   if (!state.cards.length) return;
   const c = state.cards[state.currentIndex];
@@ -404,7 +402,7 @@ document.getElementById('add-chip')?.addEventListener('click', () => { setQuickA
 document.addEventListener('keydown', (e) => {
   const tag = e.target && e.target.tagName ? e.target.tagName.toLowerCase() : '';
   if (tag === 'input' || tag === 'textarea') return;
-  if (e.key === 'ArrowRight') { e.preventDefault(); if (state.currentIndex < state.cards.length-1) { state.currentIndex++; state.isAnswerVisible=false; render(); } }
+  if (e.key === 'ArrowRight') { e.preventDefault(); next(); render(); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); if (state.currentIndex > 0) { state.currentIndex--; state.isAnswerVisible=false; render(); } }
   else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (state.cards.length) { state.isAnswerVisible = !state.isAnswerVisible; render(); } }
 });
