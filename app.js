@@ -1,47 +1,9 @@
-/* app.js - Flashcard Quiz App (logic only, minimal UI) */
-const STORAGE_KEY = 'flashcards';
-
-const SEED_CARDS = [
-  { id: 'seed_1', question: 'What is the capital of France?', answer: 'Paris' },
-  { id: 'seed_2', question: 'What is 2 + 2?', answer: '4' },
-  { id: 'seed_3', question: 'What is the largest planet?', answer: 'Jupiter' },
-  { id: 'seed_4', question: 'What color is the sky?', answer: 'Blue' },
-  { id: 'seed_5', question: 'What is H2O?', answer: 'Water' },
-];
+﻿/* app.js - Flashcard Quiz App (logic only, minimal UI) */
 
 let state = { cards: [], currentIndex: 0, isAnswerVisible: false, editingCardId: undefined };
+let formIsOpen = false;
 
-function uid() { return 'card_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8); }
 
-function validateCard(q, a) {
-  const qq = (q == null ? '' : String(q)).trim();
-  const aa = (a == null ? '' : String(a)).trim();
-  if (!qq) return { ok: false, error: 'Question is required' };
-  if (!aa) return { ok: false, error: 'Answer is required' };
-  if (qq.length > 500) return { ok: false, error: 'Question too long (max 500)' };
-  if (aa.length > 500) return { ok: false, error: 'Answer too long (max 500)' };
-  return { ok: true, question: qq, answer: aa };
-}
-
-function loadCards() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === null) return SEED_CARDS.map(c => ({ ...c }));
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) throw new Error('not array');
-    const cards = parsed
-      .filter(c => c && typeof c === 'object' && typeof c.id === 'string' && typeof c.question === 'string' && typeof c.answer === 'string')
-      .map(c => ({ id: c.id, question: c.question, answer: c.answer }));
-    if (cards.length === 0) return SEED_CARDS.map(c => ({ ...c }));
-    return cards;
-  } catch (e) {
-    return SEED_CARDS.map(c => ({ ...c }));
-  }
-}
-
-function saveCards() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.cards)); } catch (e) {}
-}
 
 function clampIndex(i, len) {
   if (len <= 0) return 0;
@@ -131,7 +93,6 @@ function render() {
   }
 }
 
-let formIsOpen = false;
 
 function toggleAnswer() {
   if (!state.cards.length) return;
@@ -185,7 +146,7 @@ function saveCard() {
   const q = document.getElementById('question-input').value;
   const a = document.getElementById('answer-input').value;
   const errEl = document.getElementById('error-message');
-  const v = validateCard(q, a);
+  const v = FlashcardStore.validateCard(q, a);
   if (!v.ok) {
     errEl.textContent = v.error;
     errEl.classList.remove('hidden');
@@ -193,7 +154,7 @@ function saveCard() {
   }
   if (state.editingCardId === null) {
     // add
-    const card = { id: uid(), question: v.question, answer: v.answer };
+    const card = { id: FlashcardStore.uid(), question: v.question, answer: v.answer };
     state.cards.push(card);
     state.currentIndex = state.cards.length - 1;
   } else if (state.editingCardId !== undefined) {
@@ -209,7 +170,7 @@ function saveCard() {
   formIsOpen = false;
   document.getElementById('question-input').value = '';
   document.getElementById('answer-input').value = '';
-  saveCards();
+  FlashcardStore.saveCards(state.cards);
   render();
 }
 
@@ -226,12 +187,12 @@ function deleteCard() {
   state.isAnswerVisible = false;
   state.editingCardId = undefined;
   formIsOpen = false;
-  saveCards();
+  FlashcardStore.saveCards(state.cards);
   render();
 }
 
 function init() {
-  state.cards = loadCards();
+  state.cards = FlashcardStore.loadCards();
   state.currentIndex = 0;
   state.isAnswerVisible = false;
   state.editingCardId = undefined;
@@ -266,3 +227,4 @@ window.deleteCard = deleteCard;
 window.__state = () => state;
 window.__loadCards = loadCards;
 window.__saveCards = saveCards;
+

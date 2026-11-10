@@ -5,63 +5,93 @@
 <title>Flashcard Quiz App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="flashcardStore.js"></script>
 <style>
-  body { font-family: 'Nunito', sans-serif; margin: 16px; color: #111827; background: #ebe9e9; }
-  .app { max-width: 480px; margin: 0 auto; background: #fff; padding: 16px; border: 1px solid #dee2e6; }
-  .card-area { border: 1px solid #dee2e6; padding: 16px; margin: 12px 0; min-height: 80px; }
-  .form { border: 1px solid #dee2e6; padding: 12px; margin: 12px 0; }
-  .form input, .form textarea { width: 100%; margin: 4px 0; padding: 6px; box-sizing: border-box; font-family: inherit; }
-  .error { color: #dc3545; font-size: 13px; }
-  .hidden { display: none; }
-  button { margin: 4px; padding: 6px 10px; cursor: pointer; font-family: inherit; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .empty { padding: 24px; text-align: center; border: 1px dashed #999; }
-  .counter { font-size: 14px; color: #6c757d; margin: 8px 0; }
-  .answer { margin-top: 8px; padding: 8px; background: #e6f1f1; }
-  .list { margin-top: 12px; }
-  .list-item { padding: 4px; border-bottom: 1px solid #eee; }
-  .primary { background: #057573; color: #fff; border: none; }
+:root{
+  --brand:#057573; --brand-2:#037674; --brand-soft:#e6f1f1; --brand-glow:rgba(5,117,115,.2);
+  --bg:#ebe9e9; --card:#ffffff; --text:#111827; --muted:#6c757d; --border:#dee2e6;
+  --danger:#dc3545; --radius:20px; --shadow:0 2px 8px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.phone{width:420px;max-width:100%;background:var(--bg);border-radius:32px;overflow:hidden;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.4);padding:20px;}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.header h1{font-size:22px;font-weight:800;color:var(--text);}
+.badge{background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;}
+.card-area{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-height:140px;margin:12px 0;box-shadow:var(--shadow);}
+.counter{font-size:13px;color:var(--muted);font-weight:600;margin:8px 0;}
+.q-text{font-size:18px;font-weight:700;color:var(--text);line-height:1.4;}
+.answer{margin-top:12px;padding:12px;background:var(--brand-soft);border-radius:12px;color:var(--brand);font-weight:600;}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+.btn{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border:none;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px var(--brand-glow);transition:.2s;}
+.btn:hover{transform:translateY(-1px);}
+.btn.outline{background:#fff;color:var(--brand);border:1.5px solid var(--brand);box-shadow:none;}
+.btn.outline:hover{background:var(--brand-soft);}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);box-shadow:none;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:12px 0;box-shadow:var(--shadow);}
+.form h3{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text);}
+.form input,.form textarea{width:100%;margin:4px 0;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;font-family:inherit;font-size:14px;outline:none;transition:.2s;}
+.form input:focus,.form textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-glow);}
+.form textarea{resize:vertical;min-height:60px;}
+.error{color:var(--danger);font-size:13px;font-weight:600;margin:4px 0;}
+.hidden{display:none;}
+.empty{padding:24px;text-align:center;border:1px dashed var(--border);border-radius:var(--radius);background:var(--card);}
+.list{margin-top:12px;max-height:160px;overflow-y:auto;scrollbar-width:none;}
+.list::-webkit-scrollbar{display:none;}
+.list-item{padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);}
 </style>
 </head>
 <body>
-<div class="app">
-  <h1>Flashcards</h1>
-
-  <div id="empty-state" data-testid="empty-state" class="empty hidden">
-    <p>No cards yet.</p>
-    <button id="add-btn-empty" data-testid="add-btn" onclick="openAdd()">Add Card</button>
+<div class="phone">
+  <div class="header">
+    <h1>Flashcards</h1>
   </div>
 
-  <div id="study" data-testid="study" class="hidden">
-    <div id="card-counter" data-testid="card-counter" class="counter">Card 0 of 0</div>
+  <div id="empty-state" class="empty hidden">
+    <p style="color:var(--muted);margin-bottom:12px;">No cards yet.</p>
+    <button id="add-btn-empty" class="btn" onclick="openAdd()">Add Card</button>
+  </div>
+
+  <div id="study" class="hidden">
+    <div id="card-counter" class="counter">Card 0 of 0</div>
     <div class="card-area">
-      <div id="card-question" data-testid="card-question"></div>
-      <div id="card-answer" data-testid="card-answer" class="answer hidden"></div>
+      <div id="card-question" class="q-text"></div>
+      <div id="card-answer" class="answer hidden"></div>
     </div>
-    <div>
-      <button id="show-answer-btn" data-testid="show-answer-btn" onclick="toggleAnswer()">Show Answer</button>
-      <button id="prev-btn" data-testid="prev-btn" onclick="prevCard()">Previous</button>
-      <button id="next-btn" data-testid="next-btn" onclick="nextCard()">Next</button>
-      <button id="edit-btn" data-testid="edit-btn" onclick="openEdit()">Edit</button>
-      <button id="delete-btn" data-testid="delete-btn" onclick="deleteCard()">Delete</button>
-      <button id="add-btn" data-testid="add-btn" onclick="openAdd()">Add Card</button>
+    <div class="btn-row">
+      <button id="show-answer-btn" class="btn outline" onclick="toggleAnswer()">Show Answer</button>
+      <button id="prev-btn" class="btn ghost" onclick="prevCard()">Previous</button>
+      <button id="next-btn" class="btn ghost" onclick="nextCard()">Next</button>
+      <button id="edit-btn" class="btn ghost" onclick="openEdit()">Edit</button>
+      <button id="delete-btn" class="btn ghost" onclick="deleteCard()">Delete</button>
+      <button id="add-btn" class="btn" onclick="openAdd()">Add Card</button>
     </div>
   </div>
 
-  <div id="form" data-testid="form" class="form hidden">
+  <div id="form" class="form hidden">
     <h3 id="form-title">Add Card</h3>
-    <input id="question-input" data-testid="question-input" placeholder="Question" />
-    <textarea id="answer-input" data-testid="answer-input" placeholder="Answer"></textarea>
-    <div id="error-message" data-testid="error-message" class="error hidden"></div>
-    <div>
-      <button id="save-btn" data-testid="save-btn" class="primary" onclick="saveCard()">Save</button>
-      <button id="cancel-btn" data-testid="cancel-btn" onclick="cancelForm()">Cancel</button>
+    <input id="question-input" placeholder="Question" />
+    <textarea id="answer-input" placeholder="Answer"></textarea>
+    <div id="error-message" class="error hidden"></div>
+    <div class="btn-row">
+      <button id="save-btn" class="btn" onclick="saveCard()">Save</button>
+      <button id="cancel-btn" class="btn ghost" onclick="cancelForm()">Cancel</button>
     </div>
   </div>
 
-  <div id="list" data-testid="list" class="list"></div>
+  <div id="list" class="list"></div>
 </div>
 
 <script src="app.js"></script>
+<script>
+// wire data-testid for compatibility
+(function(){
+  const ids=['empty-state','study','form','card-counter','card-question','card-answer','show-answer-btn','prev-btn','next-btn','edit-btn','delete-btn','add-btn','question-input','answer-input','save-btn','cancel-btn','error-message','list'];
+  ids.forEach(id=>{const el=document.getElementById(id); if(el && !el.hasAttribute('data-testid')) el.setAttribute('data-testid', id);});
+  const ae=document.getElementById('add-btn-empty'); if(ae) ae.setAttribute('data-testid','add-btn');
+})();
+</script>
 </body>
 </html>
