@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flashcard Quiz App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root{--brand:#6366F1;--brand-2:#8B5CF6;--brand-soft:#EEF2FF;--bg:#F1F5F9;--card:#fff;--text:#0F172A;--muted:#64748B;--border:#E2E8F0;--success:#10B981;--danger:#EF4444;--radius:20px;--shadow:0 10px 30px rgba(15,23,42,.08);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.app{width:420px;max-width:100%;background:var(--bg);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);padding:24px;}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.header h1{font-size:22px;font-weight:800;color:var(--text);}
+.header .badge{background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:600;padding:4px 10px;border-radius:8px;}
+.card-area{perspective:1000px;margin:16px 0;}
+.flashcard{width:100%;min-height:240px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;cursor:pointer;transition:transform .4s;transform-style:preserve-3d;position:relative;}
+.flashcard.flipped{transform:rotateY(180deg);}
+.flashcard .face{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;backface-visibility:hidden;}
+.flashcard .back{transform:rotateY(180deg);background:var(--brand-soft);}
+.flashcard .label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.flashcard .text{font-size:20px;font-weight:700;color:var(--text);line-height:1.4;}
+.flashcard .back .text{color:var(--brand);}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:40px;}
+.controls{display:flex;gap:10px;margin:16px 0;}
+.btn{flex:1;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 6px 16px rgba(99,102,241,.25);}
+.btn:hover{transform:translateY(-1px);}
+.btn.outline{background:#fff;color:var(--brand);border:1.5px solid var(--brand);box-shadow:none;}
+.btn.outline:hover{background:var(--brand-soft);}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);box-shadow:none;}
+.nav{display:flex;align-items:center;justify-content:space-between;margin:12px 0;}
+.nav button{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:10px 16px;cursor:pointer;font-weight:600;color:var(--text);transition:.2s;}
+.nav button:hover{border-color:var(--brand);color:var(--brand);}
+.counter{font-size:13px;color:var(--muted);font-weight:600;}
+.form{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border:1px solid var(--border);margin-top:16px;}
+.form h3{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text);}
+.form input,.form textarea{width:100%;border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;font-family:inherit;margin-bottom:8px;outline:none;transition:.2s;}
+.form input:focus,.form textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(99,102,241,.15);}
+.form textarea{resize:vertical;min-height:60px;}
+.form .row{display:flex;gap:8px;}
+.list{margin-top:16px;max-height:200px;overflow-y:auto;}
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:6px;}
+.list-item span{font-size:13px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.list-item button{background:transparent;border:none;cursor:pointer;color:var(--muted);padding:4px;}
+.list-item button:hover{color:var(--danger);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F172A;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:500;opacity:0;transition:.3s;pointer-events:none;z-index:100;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Flashcards</h1>
+    <span class="badge" id="countBadge">0 cards</span>
+  </div>
+  <div class="card-area">
+    <div class="flashcard" id="flashcard" onclick="flip()">
+      <div class="face front"><div class="label">Question</div><div class="text" id="qText">Add your first flashcard below</div></div>
+      <div class="face back"><div class="label">Answer</div><div class="text" id="aText"></div></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button onclick="prev()"><i data-lucide="chevron-left" style="width:18px;height:18px;"></i> Prev</button>
+    <span class="counter" id="counter">0 / 0</span>
+    <button onclick="next()">Next <i data-lucide="chevron-right" style="width:18px;height:18px;"></i></button>
+  </div>
+  <div class="controls">
+    <button class="btn outline" onclick="showAnswer()">Show Answer</button>
+    <button class="btn ghost" onclick="deleteCurrent()">Delete</button>
+  </div>
+
+  <div class="form">
+    <h3 id="formTitle">Add Flashcard</h3>
+    <input id="qInput" placeholder="Question (front)">
+    <textarea id="aInput" placeholder="Answer (back)"></textarea>
+    <div class="row">
+      <button class="btn" onclick="saveCard()">Save</button>
+      <button class="btn ghost" onclick="cancelEdit()">Cancel</button>
+    </div>
+  </div>
+
+  <div class="list" id="cardList"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+lucide.createIcons();
+let cards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+let idx = 0;
+let editing = -1;
+
+function save(){ localStorage.setItem('flashcards', JSON.stringify(cards)); }
+
+function render(){
+  const badge = document.getElementById('countBadge');
+  const counter = document.getElementById('counter');
+  const card = document.getElementById('flashcard');
+  const qText = document.getElementById('qText');
+  const aText = document.getElementById('aText');
+  badge.textContent = cards.length + ' card' + (cards.length!==1?'s':'');
+  if(cards.length===0){ counter.textContent='0 / 0'; qText.textContent='Add your first flashcard below'; aText.textContent=''; card.classList.remove('flipped'); return; }
+  if(idx>=cards.length) idx=cards.length-1;
+  if(idx<0) idx=0;
+  counter.textContent = (idx+1) + ' / ' + cards.length;
+  qText.textContent = cards[idx].q;
+  aText.textContent = cards[idx].a;
+  card.classList.remove('flipped');
+  renderList();
+}
+
+function flip(){ if(cards.length) document.getElementById('flashcard').classList.toggle('flipped'); }
+function showAnswer(){ if(cards.length) document.getElementById('flashcard').classList.add('flipped'); }
+function next(){ if(cards.length){ idx=(idx+1)%cards.length; render(); } }
+function prev(){ if(cards.length){ idx=(idx-1+cards.length)%cards.length; render(); } }
+function deleteCurrent(){ if(!cards.length) return; cards.splice(idx,1); if(idx>=cards.length) idx=Math.max(0,cards.length-1); save(); render(); toast('Card deleted'); }
+
+function saveCard(){
+  const q=document.getElementById('qInput').value.trim();
+  const a=document.getElementById('aInput').value.trim();
+  if(!q||!a){ toast('Fill both fields'); return; }
+  if(editing>=0){ cards[editing]={q,a}; editing=-1; toast('Card updated'); }
+  else { cards.push({q,a}); toast('Card added'); }
+  document.getElementById('qInput').value='';
+  document.getElementById('aInput').value='';
+  document.getElementById('formTitle').textContent='Add Flashcard';
+  save(); idx=cards.length-1; render();
+}
+function cancelEdit(){ editing=-1; document.getElementById('qInput').value=''; document.getElementById('aInput').value=''; document.getElementById('formTitle').textContent='Add Flashcard'; }
+function editCard(i){ editing=i; document.getElementById('qInput').value=cards[i].q; document.getElementById('aInput').value=cards[i].a; document.getElementById('formTitle').textContent='Edit Flashcard'; window.scrollTo(0,document.body.scrollHeight); }
+function renderList(){
+  const list=document.getElementById('cardList'); list.innerHTML='';
+  cards.forEach((c,i)=>{
+    const d=document.createElement('div'); d.className='list-item';
+    d.innerHTML=`<span>${i+1}. ${c.q}</span><button onclick="editCard(${i})" title="Edit"><i data-lucide="pencil" style="width:14px;height:14px;"></i></button><button onclick="delCard(${i})" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>`;
+    list.appendChild(d);
+  });
+  lucide.createIcons();
+}
+function delCard(i){ cards.splice(i,1); if(idx>=cards.length) idx=Math.max(0,cards.length-1); save(); render(); toast('Card deleted'); }
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>t.classList.remove('show'),2200);}
+
+render();
+</script>
+</body>
+</html>
