@@ -387,6 +387,19 @@ document.getElementById('modal-backdrop').addEventListener('click', closeDeleteM
 
 document.getElementById('close-allcards').addEventListener('click', closeAllCards);
 
+
+// Header search and quick actions
+const cardSearch = document.getElementById('card-search');
+if (cardSearch) cardSearch.addEventListener('input', () => {
+  const term = cardSearch.value.trim().toLowerCase();
+  if (!term) return;
+  const found = state.cards.findIndex(card => (card.question + ' ' + card.answer).toLowerCase().includes(term));
+  if (found >= 0) { state.currentIndex = found; state.isAnswerVisible = false; render(); }
+});
+const setQuickAction = (activeId) => document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.toggle('active', chip.id === activeId));
+document.getElementById('study-chip')?.addEventListener('click', () => { closeAllCards(); setQuickAction('study-chip'); });
+document.getElementById('deck-chip')?.addEventListener('click', () => { setQuickAction('deck-chip'); openAllCards(); });
+document.getElementById('add-chip')?.addEventListener('click', () => { setQuickAction('add-chip'); openAdd(); });
 // keyboard
 document.addEventListener('keydown', (e) => {
   const tag = e.target && e.target.tagName ? e.target.tagName.toLowerCase() : '';
